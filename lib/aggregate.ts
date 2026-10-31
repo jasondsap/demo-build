@@ -78,6 +78,11 @@ export function aggregateToText(agg: Aggregate): string {
   const lines: string[] = [`Survey: ${SURVEY.title}`, `Total responses: ${agg.total}`, ""];
   for (const s of agg.questions) {
     lines.push(`Q: ${s.question.label}`);
+    if (s.question.type === "scale") {
+      const lo = s.question.minLabel ? ` (${s.question.minLabel})` : "";
+      const hi = s.question.maxLabel ? ` (${s.question.maxLabel})` : "";
+      lines.push(`  scale ${s.question.min}${lo} to ${s.question.max}${hi}`);
+    }
     if (s.kind === "text") {
       if (!s.answers.length) lines.push("  (no answers)");
       for (const a of s.answers) lines.push(`  - ${a}`);

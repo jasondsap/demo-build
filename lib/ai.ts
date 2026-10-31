@@ -23,6 +23,7 @@ Rules:
 - If the sample is small (under 20), say so plainly and treat findings as a starting point, not a conclusion.
 - Do not give medical advice or make clinical claims.
 - Keep it under 250 words.
+- Plain text only. No markdown, no asterisks, no pound signs. Each heading on its own line, list items with a leading dash.
 
 Format exactly these sections, as plain text with these headings:
 What stands out
@@ -50,5 +51,7 @@ export async function summarizeAggregate(aggregateText: string): Promise<string>
     .filter((block): block is Anthropic.TextBlock => block.type === "text")
     .map((block) => block.text)
     .join("\n")
+    .replace(/\*\*/g, "") // belt and braces: strip markdown if the model slips
+    .replace(/^#+\s*/gm, "")
     .trim();
 }

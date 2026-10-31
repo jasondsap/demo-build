@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 
+/** Section headings the prompt in lib/ai.ts asks for. Rendered bold. */
+const HEADINGS = new Set([
+  "what stands out",
+  "what people say would help",
+  "suggested next steps",
+  "caveats",
+]);
+
 export default function SummaryPanel({ total, aiConfigured }: { total: number; aiConfigured: boolean }) {
   const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +66,15 @@ export default function SummaryPanel({ total, aiConfigured }: { total: number; a
 
       {summary && (
         <div className="mt-4 whitespace-pre-wrap rounded-lg bg-mist p-4 text-sm leading-relaxed">
-          {summary}
+          {summary.split("\n").map((line, i) =>
+            HEADINGS.has(line.trim().replace(/:$/, "").toLowerCase()) ? (
+              <div key={i} className={"font-semibold text-navy" + (i > 0 ? " mt-3" : "")}>
+                {line}
+              </div>
+            ) : (
+              <div key={i}>{line}</div>
+            ),
+          )}
         </div>
       )}
     </section>
