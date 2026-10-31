@@ -77,7 +77,27 @@ The table is created automatically on first write, so a missed `db:setup` will n
 
 ### Prompts to paste into Claude Code
 
-**Rewrite the survey for the room's topic**
+**From a whiteboard photo (the planned flow)**
+
+Paste the photo into Claude Code (Ctrl+V) or drag the file into the terminal, then:
+
+```
+Here is a photo of the whiteboard. Read the five questions and list them back to me
+with your proposed answer options before changing anything. Follow CLAUDE.md:
+nothing that could identify a person, aggregate only.
+```
+
+Fix anything it misread, then:
+
+```
+Good. Rewrite lib/survey.ts with those five questions, a mix of single, multi, scale
+and one optional text. Give SURVEY.id a new value. Do not touch any other file.
+Run npm run build to confirm it compiles.
+```
+
+Show the diff, commit, push. Vercel rebuilds in about a minute. The URL and QR code do not change.
+
+**Rewrite the survey for the room's topic (typed, no photo)**
 
 ```
 Rewrite the survey in lib/survey.ts for this topic: <TOPIC FROM THE ROOM>.
