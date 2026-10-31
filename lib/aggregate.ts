@@ -1,4 +1,4 @@
-import { SURVEY, type Answers, type Question } from "./survey";
+import { SURVEY, branchNote, type Answers, type Question } from "./survey";
 
 /**
  * Turns raw submissions into counts. This is the ONLY thing the AI sees:
@@ -78,6 +78,8 @@ export function aggregateToText(agg: Aggregate): string {
   const lines: string[] = [`Survey: ${SURVEY.title}`, `Total responses: ${agg.total}`, ""];
   for (const s of agg.questions) {
     lines.push(`Q: ${s.question.label}`);
+    const note = branchNote(s.question);
+    if (note) lines.push(`  ${note} ${s.answered} of ${agg.total} saw this question.`);
     if (s.question.type === "scale") {
       const lo = s.question.minLabel ? ` (${s.question.minLabel})` : "";
       const hi = s.question.maxLabel ? ` (${s.question.maxLabel})` : "";

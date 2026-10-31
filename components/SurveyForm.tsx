@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Survey, Answers } from "@/lib/survey";
+import { isShown, type Survey, type Answers } from "@/lib/survey";
 
 export default function SurveyForm({ survey }: { survey: Survey }) {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function SurveyForm({ survey }: { survey: Survey }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {survey.questions.map((q, idx) => (
+      {survey.questions.filter((q) => isShown(q, answers)).map((q, idx) => (
         <fieldset key={q.id} className="bg-white rounded-xl border border-line p-5">
           <legend className="sr-only">{q.label}</legend>
           <div className="font-medium text-navy">

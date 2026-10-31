@@ -12,7 +12,14 @@
  *    never a respondent.
  */
 
-export type Question =
+/**
+ * Branch logic. A question with showIf is only shown, and only accepted by the
+ * server, when an EARLIER question has exactly this answer. Keep it to one rule
+ * per question; if you need more than that, the survey is too long.
+ */
+export type ShowIf = { question: string; equals: string };
+
+export type Question = (
   | { id: string; type: "single"; label: string; options: string[]; required?: boolean }
   | { id: string; type: "multi"; label: string; options: string[]; required?: boolean }
   | {
@@ -25,7 +32,8 @@ export type Question =
       maxLabel?: string;
       required?: boolean;
     }
-  | { id: string; type: "text"; label: string; placeholder?: string; maxLength?: number; required?: boolean };
+  | { id: string; type: "text"; label: string; placeholder?: string; maxLength?: number; required?: boolean }
+) & { showIf?: ShowIf };
 
 export type Survey = {
   /** Changing the id starts a fresh result set. Old rows stay in the table. */
@@ -59,7 +67,9 @@ export const SURVEY: Survey = {
       id: "ai_tools",
       type: "multi",
       label: "Which AI tools have you used? (pick all that apply)",
-      options: ["Claude", "ChatGPT", "Gemini", "Copilot", "Other", "None"],
+      options: ["Claude", "ChatGPT", "Gemini", "Copilot", "Other"],
+      required: true,
+      showIf: { question: "used_ai", equals: "Yes" }, // only people who said Yes above
     },
     {
       id: "cashapp",
@@ -74,9 +84,22 @@ export const SURVEY: Survey = {
 /** Shape of one stored submission: question id -> answer. */
 export type Answers = Record<string, string | string[] | number>;
 
+/** Should this question be shown, given the answers so far? Used by the form AND the server. */
+export function isShown(q: Question, answers: Answers): boolean {
+  return !q.showIf || answers[q.showIf.question] === q.showIf.equals;
+}
+
+/** Plain-English note for branched questions, shown on results and given to the AI. */
+export function branchNote(q: Question): string | null {
+  if (!q.showIf) return null;
+  const parent = SURVEY.questions.find((p) => p.id === q.showIf!.question);
+  return `Only asked of people who answered "${q.showIf.equals}" to "${parent?.label ?? q.showIf.question}".`;
+}
+
 /**
  * Server-side validation. Returns clean answers or a list of problems.
- * Unknown keys are dropped. Text is trimmed and capped.
+ * Unknown keys are dropped. Text is trimmed and capped. Branched questions
+ * whose condition is not met are dropped too, even if the client sent them.
  */
 export function validateAnswers(
   input: unknown,
@@ -86,6 +109,7 @@ export function validateAnswers(
   const raw = (input && typeof input === "object" ? input : {}) as Record<string, unknown>;
 
   for (const q of SURVEY.questions) {
+    if (!isShown(q, answers)) continue; // answers so far: branches point at earlier questions
     const v = raw[q.id];
     const missing =
       v === undefined || v === null || v === "" || (Array.isArray(v) && v.length === 0);

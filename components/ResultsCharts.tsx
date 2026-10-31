@@ -1,4 +1,5 @@
 import type { Aggregate } from "@/lib/aggregate";
+import { branchNote } from "@/lib/survey";
 
 /** Server component. Plain CSS bars, no chart library, nothing to break. */
 export default function ResultsCharts({ aggregate }: { aggregate: Aggregate }) {
@@ -18,6 +19,7 @@ export default function ResultsCharts({ aggregate }: { aggregate: Aggregate }) {
           <p className="text-xs text-muted mt-0.5">
             {s.answered} answered
             {s.kind === "scale" && s.average !== null && <> · average {s.average}</>}
+            {branchNote(s.question) && <> · {branchNote(s.question)}</>}
           </p>
 
           {s.kind !== "text" && (

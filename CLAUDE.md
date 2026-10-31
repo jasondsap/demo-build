@@ -46,6 +46,8 @@ teaching point. Do not add auth, cookies, analytics or tracking.
 
 Add an object to `SURVEY.questions` in `lib/survey.ts`. Types: `single`, `multi`, `scale`, `text`.
 Nothing else needs to change: form, validation, results and the AI prompt all read from `SURVEY`.
+To show a question only after a specific answer, add `showIf: { question: "<earlier id>", equals: "<option>" }`.
+The form hides it, the server drops it if the condition is not met, and results note who was asked.
 
 ## Environment
 
